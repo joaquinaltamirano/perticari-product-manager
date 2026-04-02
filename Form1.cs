@@ -1,9 +1,22 @@
-﻿namespace WinFormsApp6
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace WinFormsApp6
 {
     public partial class Form1 : Form
     {
         // =========================
-        // 📦 DATOS PRINCIPALES
+        // 🔍 ESTADO Y BUSCADOR
+        // =========================
+        string textoBusqueda = "";
+        Dictionary<string, int> nivelesFiltro = new Dictionary<string, int>();
+
+        // =========================
+        // 📦 MODELOS DE DATOS
         // =========================
         List<Producto> productos = new List<Producto>();
         Filtros filtros = new Filtros();
@@ -15,66 +28,110 @@
         }
 
         // =========================
-        // 🌳 CREAR BLOQUE DESDE NODO (ENTRY POINT)
+        // 🌳 MOTOR DE INTERFAZ (Recursivo)
         // =========================
-        void CrearBloqueDesdeNodo(Nodo nodo, int nivel)
+        void RefrescarTodo()
         {
-            var bloque = CrearBloqueUI(nodo, nivel);
-            panel3.Controls.Add(bloque);
+            // 1. Limpiar el contenedor de bloques visuales
+            panel3.Controls.Clear();
 
-            // 👇 opcional: auto scroll al nuevo bloque
+            // 2. Reconstruir la cascada de paneles basándose en la jerarquía activa
+            ReconstruirCascada(raiz, 0);
+
+            // 3. Sincronizar datos y elementos de apoyo
+            AplicarFiltros();
+            RenderFiltrosActivos();
+            ActualizarBreadcrumb();
+        }
+
+        void ReconstruirCascada(Nodo nodoActual, int nivel)
+        {
+            if (nodoActual == null) return;
+
+            // Crear y agregar el bloque de opciones al panel
+            var bloque = CrearBloqueUI(nodoActual, nivel);
+            panel3.Controls.Add(bloque);
             panel3.ScrollControlIntoView(bloque);
+
+            // Si este nodo tiene un filtro seleccionado, "viajamos" al siguiente nivel
+            if (filtros.Activos.ContainsKey(nodoActual.ClaveFiltro))
+            {
+                string valorSeleccionado = filtros.Activos[nodoActual.ClaveFiltro];
+                var opcion = nodoActual.Opciones.FirstOrDefault(o => o.Nombre == valorSeleccionado);
+
+                if (opcion != null && opcion.Siguiente != null)
+                {
+                    ReconstruirCascada(opcion.Siguiente, nivel + 1);
+                }
+            }
         }
 
         // =========================
-        // 🧱 CREACIÓN VISUAL DEL BLOQUE
+        // 🧱 CONSTRUCCIÓN DE BLOQUES (UI Dinámica)
         // =========================
         Panel CrearBloqueUI(Nodo nodo, int nivel)
         {
-            Panel bloque = new Panel();
-            bloque.Width = 300;
-            bloque.Height = 150;
-            bloque.Margin = new Padding(10);
-            bloque.BorderStyle = BorderStyle.FixedSingle;
-            bloque.BackColor = Color.LightGray;
+            Panel bloque = new Panel
+            {
+                Width = 300,
+                Height = 150,
+                Margin = new Padding(10),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray,
+                Tag = nivel // El Tag es clave para identificar el nivel en el árbol
+            };
 
-            // 🔤 TÍTULO
-            Label lbl = new Label();
-            lbl.Text = nodo.Titulo;
-            lbl.Dock = DockStyle.Top;
-            lbl.Height = 30;
-            lbl.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            Label lbl = new Label
+            {
+                Text = nodo.Titulo,
+                Dock = DockStyle.Top,
+                Height = 30,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(5, 0, 0, 0)
+            };
 
-            // 🔘 CONTENEDOR DE BOTONES
-            FlowLayoutPanel flow = new FlowLayoutPanel();
-            flow.Dock = DockStyle.Fill;
+            FlowLayoutPanel flow = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(5) };
 
-            // 🔁 CREAR BOTONES DINÁMICOS
             foreach (var opcionNodo in nodo.Opciones)
             {
-                Button btn = new Button();
-                btn.Text = opcionNodo.Nombre;
-                btn.Width = 90;
-                btn.Height = 35;
-                btn.FlatStyle = FlatStyle.Flat;
+                Button btn = new Button
+                {
+                    Text = opcionNodo.Nombre,
+                    Width = 90,
+                    Height = 35,
+                    FlatStyle = FlatStyle.Flat
+                };
                 btn.FlatAppearance.BorderColor = Color.Black;
+
+                // 🎨 SINCRONIZACIÓN VISUAL: ¿Es la opción seleccionada?
+                if (filtros.Activos.ContainsKey(nodo.ClaveFiltro) && filtros.Activos[nodo.ClaveFiltro] == opcionNodo.Nombre)
+                {
+                    btn.BackColor = Color.Black;
+                    btn.ForeColor = Color.White;
+                }
+                else
+                {
+                    btn.BackColor = Color.LightGray;
+                    btn.ForeColor = Color.Black;
+                }
 
                 btn.Click += (s, e) =>
                 {
-                    // 🧠 1. guardar filtro
-                    filtros.Activos[nodo.ClaveFiltro] = opcionNodo.Nombre;
-
-                    // 🧹 2. borrar lo que está abajo
-                    EliminarBloquesDesde(nivel + 1);
-
-                    // 🌱 3. crear siguiente nivel si existe
-                    if (opcionNodo.Siguiente != null)
+                    // 1. Al elegir, matamos cualquier filtro que sea de nivel igual o superior (limpieza jerárquica)
+                    var clavesAEliminar = nivelesFiltro.Where(x => x.Value >= nivel).Select(x => x.Key).ToList();
+                    foreach (var c in clavesAEliminar)
                     {
-                        CrearBloqueDesdeNodo(opcionNodo.Siguiente, nivel + 1);
+                        filtros.Activos.Remove(c);
+                        nivelesFiltro.Remove(c);
                     }
 
-                    // 🔄 4. actualizar grid
-                    AplicarFiltros();
+                    // 2. Registramos la nueva selección
+                    filtros.Activos[nodo.ClaveFiltro] = opcionNodo.Nombre;
+                    nivelesFiltro[nodo.ClaveFiltro] = nivel;
+
+                    // 3. Gatillamos la reconstrucción total
+                    RefrescarTodo();
                 };
 
                 flow.Controls.Add(btn);
@@ -82,44 +139,59 @@
 
             bloque.Controls.Add(flow);
             bloque.Controls.Add(lbl);
-
-            // 🏷️ guardamos nivel
-            bloque.Tag = nivel;
-
             return bloque;
         }
 
         // =========================
-        // 🧹 BORRAR BLOQUES INFERIORES
+        // 🏷️ CHIPS Y BREADCRUMB
         // =========================
-        void EliminarBloquesDesde(int nivel)
+        void RenderFiltrosActivos()
         {
-            var bloquesAEliminar = panel3.Controls
-                .Cast<Control>()
-                .Where(c => c.Tag != null && (int)c.Tag >= nivel)
-                .ToList();
+            panelFiltros.Controls.Clear();
 
-            foreach (var b in bloquesAEliminar)
+            // Ordenamos por nivel para que los chips respeten la jerarquía visual
+            var filtrosOrdenados = nivelesFiltro.OrderBy(x => x.Value).ToList();
+
+            foreach (var item in filtrosOrdenados)
             {
-                panel3.Controls.Remove(b);
+                Button chip = new Button
+                {
+                    Text = $"{filtros.Activos[item.Key]} ✕",
+                    AutoSize = true,
+                    BackColor = Color.Black,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Margin = new Padding(2),
+                    Cursor = Cursors.Hand
+                };
+
+                chip.Click += (s, e) =>
+                {
+                    // Al borrar un chip, eliminamos esa rama y sus descendientes
+                    var aBorrar = nivelesFiltro.Where(x => x.Value >= item.Value).Select(x => x.Key).ToList();
+                    foreach (var c in aBorrar)
+                    {
+                        filtros.Activos.Remove(c);
+                        nivelesFiltro.Remove(c);
+                    }
+
+                    RefrescarTodo();
+                };
+
+                panelFiltros.Controls.Add(chip);
             }
         }
 
-        // =========================
-        // 📊 GRID
-        // =========================
-        void CargarGrid(List<Producto> lista)
+        void ActualizarBreadcrumb()
         {
-            dataGridView1.Rows.Clear();
+            var ruta = nivelesFiltro.OrderBy(x => x.Value)
+                                    .Select(x => filtros.Activos[x.Key]);
 
-            foreach (var p in lista)
-            {
-                dataGridView1.Rows.Add(p.Nombre);
-            }
+            labelBreadcrumb.Text = ruta.Any() ? string.Join(" > ", ruta) : "Todos los productos";
         }
 
         // =========================
-        // 🔍 FILTRADO
+        // 📊 FILTRADO DE DATOS (LINQ)
         // =========================
         void AplicarFiltros()
         {
@@ -128,57 +200,55 @@
                     (f.Key == "Categoria" && p.Categoria == f.Value) ||
                     (p.Atributos.ContainsKey(f.Key) && p.Atributos[f.Key] == f.Value)
                 )
+                &&
+                (
+                    string.IsNullOrEmpty(textoBusqueda) ||
+                    p.Nombre.ToLower().Contains(textoBusqueda) ||
+                    p.Atributos.Values.Any(v => v != null && v.ToLower().Contains(textoBusqueda))
+                )
             ).ToList();
 
             CargarGrid(filtrados);
         }
 
+        void CargarGrid(List<Producto> lista)
+        {
+            dataGridView1.Rows.Clear();
+            foreach (var p in lista)
+            {
+                dataGridView1.Rows.Add(p.Nombre);
+            }
+        }
+
         // =========================
-        // 🚀 INICIO
+        // 🚀 EVENTOS DE FORMULARIO
         // =========================
         private void Form1_Load(object sender, EventArgs e)
         {
-            // 🧱 columnas
             dataGridView1.Columns.Add("Nombre", "Nombre");
 
-            // =========================
-            // 🧪 DATA MOCK
-            // =========================
-            productos.Add(new Producto
-            {
-                Nombre = "Chapa trapezoidal 0.5",
-                Categoria = "Chapas",
-                Atributos = new Dictionary<string, string>
-                {
-                    { "Tipo", "Techo" },
-                    { "Forma", "Trapezoidal" },
-                    { "Espesor", "0.5" }
-                }
-            });
+            // Mock Data para pruebas
+            productos.Add(new Producto { Nombre = "Chapa trapezoidal 0.5", Categoria = "Chapas", Atributos = new Dictionary<string, string> { { "Tipo", "Techo" }, { "Forma", "Trapezoidal" } } });
+            productos.Add(new Producto { Nombre = "Caño 30x30 1.6", Categoria = "Caños", Atributos = new Dictionary<string, string> { { "Tipo", "Estructural" }, { "Forma", "Cuadrado" } } });
 
-            productos.Add(new Producto
-            {
-                Nombre = "Caño 30x30 1.6",
-                Categoria = "Caños",
-                Atributos = new Dictionary<string, string>
-                {
-                    { "Tipo", "Estructural" },
-                    { "Forma", "Cuadrado" }
-                }
-            });
-
-            // =========================
-            // 🌳 ÁRBOL (SOLO CHAPAS POR AHORA)
-            // =========================
             raiz = MapaCategorias.Crear();
+            RefrescarTodo();
 
-            // =========================
-            // 🟢 ARRANQUE UI
-            // =========================
-            CrearBloqueDesdeNodo(raiz, 0);
+            textBox1.TextChanged += (s, ev) =>
+            {
+                textoBusqueda = textBox1.Text.ToLower();
+                AplicarFiltros();
+            };
+        }
 
-            // cargar todo al inicio
-            CargarGrid(productos);
+        private void limpiarFiltros_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            filtros.Activos.Clear();
+            nivelesFiltro.Clear();
+            textBox1.Clear();
+            textoBusqueda = "";
+
+            RefrescarTodo();
         }
     }
 }

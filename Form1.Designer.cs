@@ -29,14 +29,14 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            label2 = new Label();
+            labelBreadcrumb = new Label();
             dataGridView1 = new DataGridView();
             panel2 = new Panel();
             panel3 = new FlowLayoutPanel();
-            linkLabel1 = new LinkLabel();
+            limpiarFiltros = new LinkLabel();
             button2 = new Button();
             textBox1 = new TextBox();
-            flowLayoutPanel1 = new FlowLayoutPanel();
+            panelFiltros = new FlowLayoutPanel();
             button1 = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -45,22 +45,22 @@
             // 
             // panel1
             // 
-            panel1.Controls.Add(label2);
+            panel1.Controls.Add(labelBreadcrumb);
             panel1.Controls.Add(dataGridView1);
             panel1.Location = new Point(422, 12);
             panel1.Name = "panel1";
             panel1.Size = new Size(336, 495);
             panel1.TabIndex = 0;
             // 
-            // label2
+            // labelBreadcrumb
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(22, 12);
-            label2.Name = "label2";
-            label2.Size = new Size(93, 20);
-            label2.TabIndex = 5;
-            label2.Text = "Breadcrumb";
+            labelBreadcrumb.AutoSize = true;
+            labelBreadcrumb.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            labelBreadcrumb.Location = new Point(22, 12);
+            labelBreadcrumb.Name = "labelBreadcrumb";
+            labelBreadcrumb.Size = new Size(93, 20);
+            labelBreadcrumb.TabIndex = 5;
+            labelBreadcrumb.Text = "Breadcrumb";
             // 
             // dataGridView1
             // 
@@ -73,10 +73,10 @@
             // panel2
             // 
             panel2.Controls.Add(panel3);
-            panel2.Controls.Add(linkLabel1);
+            panel2.Controls.Add(limpiarFiltros);
             panel2.Controls.Add(button2);
             panel2.Controls.Add(textBox1);
-            panel2.Controls.Add(flowLayoutPanel1);
+            panel2.Controls.Add(panelFiltros);
             panel2.Location = new Point(60, 12);
             panel2.Name = "panel2";
             panel2.Size = new Size(336, 495);
@@ -93,17 +93,18 @@
             panel3.TabIndex = 4;
             panel3.WrapContents = false;
             // 
-            // linkLabel1
+            // limpiarFiltros
             // 
-            linkLabel1.AutoSize = true;
-            linkLabel1.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            linkLabel1.ForeColor = SystemColors.ControlText;
-            linkLabel1.Location = new Point(252, 13);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new Size(60, 20);
-            linkLabel1.TabIndex = 3;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "Limpiar";
+            limpiarFiltros.AutoSize = true;
+            limpiarFiltros.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            limpiarFiltros.ForeColor = SystemColors.ControlText;
+            limpiarFiltros.Location = new Point(252, 13);
+            limpiarFiltros.Name = "limpiarFiltros";
+            limpiarFiltros.Size = new Size(60, 20);
+            limpiarFiltros.TabIndex = 3;
+            limpiarFiltros.TabStop = true;
+            limpiarFiltros.Text = "Limpiar";
+            limpiarFiltros.LinkClicked += limpiarFiltros_LinkClicked;
             // 
             // button2
             // 
@@ -123,13 +124,13 @@
             textBox1.Size = new Size(293, 27);
             textBox1.TabIndex = 1;
             // 
-            // flowLayoutPanel1
+            // panelFiltros
             // 
-            flowLayoutPanel1.BorderStyle = BorderStyle.FixedSingle;
-            flowLayoutPanel1.Location = new Point(19, 44);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(293, 67);
-            flowLayoutPanel1.TabIndex = 0;
+            panelFiltros.BorderStyle = BorderStyle.FixedSingle;
+            panelFiltros.Location = new Point(19, 44);
+            panelFiltros.Name = "panelFiltros";
+            panelFiltros.Size = new Size(293, 67);
+            panelFiltros.TabIndex = 0;
             // 
             // button1
             // 
@@ -164,12 +165,12 @@
 
         private Panel panel1;
         private Panel panel2;
-        private FlowLayoutPanel flowLayoutPanel1;
+        private FlowLayoutPanel panelFiltros;
         private Button button1;
         private Button button2;
         private TextBox textBox1;
-        private LinkLabel linkLabel1;
-        private Label label2;
+        private LinkLabel limpiarFiltros;
+        private Label labelBreadcrumb;
         private DataGridView dataGridView1;
         private FlowLayoutPanel panel3;
     }
