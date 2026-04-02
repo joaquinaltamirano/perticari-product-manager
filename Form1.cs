@@ -1,4 +1,4 @@
-namespace WinFormsApp6
+﻿namespace WinFormsApp6
 {
     public partial class Form1 : Form
     {
@@ -9,20 +9,95 @@ namespace WinFormsApp6
             InitializeComponent();
         }
 
-        void CrearBoton(string texto, string claveFiltro, string valor)
+        Panel CrearBloque(string titulo, List<string> opciones, string claveFiltro, int nivel)
         {
-            Button btn = new Button();
-            btn.Text = texto;
-            btn.Width = 100;
-            btn.Height = 40;
+            Panel bloque = new Panel();
+            bloque.Width = 300;
+            bloque.Height = 150;
+            bloque.Margin = new Padding(10);
 
-            btn.Click += (s, e) =>
+            // 👇 ESTÉTICA (lo que pediste)
+            bloque.BorderStyle = BorderStyle.FixedSingle;
+            bloque.BackColor = Color.White;
+
+            Label lbl = new Label();
+            lbl.Text = titulo;
+            lbl.Dock = DockStyle.Top;
+            lbl.Height = 30;
+            lbl.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+
+            FlowLayoutPanel flow = new FlowLayoutPanel();
+            flow.Dock = DockStyle.Fill;
+
+            foreach (var opcion in opciones)
             {
-                filtros.Activos[claveFiltro] = valor;
-                AplicarFiltros();
-            };
+                Button btn = new Button();
+                btn.Text = opcion;
+                btn.Width = 90;
+                btn.Height = 35;
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderColor = Color.Black;
 
-            flowLayoutPanel1.Controls.Add(btn);
+                btn.Click += (s, e) =>
+                {
+                    // 1. guardar filtro
+                    filtros.Activos[claveFiltro] = opcion;
+
+                    // 2. borrar bloques siguientes
+                    EliminarBloquesDesde(nivel + 1);
+
+                    // 3. crear siguiente bloque (hardcodeado por ahora)
+                    CrearSiguienteBloque(claveFiltro, opcion, nivel + 1);
+
+                    // 4. actualizar grid
+                    AplicarFiltros();
+                };
+
+                flow.Controls.Add(btn);
+            }
+
+            bloque.Controls.Add(flow);
+            bloque.Controls.Add(lbl);
+
+            // 👇 GUARDAMOS NIVEL EN TAG
+            bloque.Tag = nivel;
+
+            return bloque;
+        }
+
+        void EliminarBloquesDesde(int nivel)
+        {
+            var bloquesAEliminar = panel3.Controls
+                .Cast<Control>()
+                .Where(c => c.Tag != null && (int)c.Tag >= nivel)
+                .ToList();
+
+            foreach (var b in bloquesAEliminar)
+            {
+                panel3.Controls.Remove(b);
+            }
+        }
+
+        void CrearSiguienteBloque(string clave, string valor, int nivel)
+        {
+            // ejemplo básico
+            if (clave == "Categoria" && valor == "Chapas")
+            {
+                var opciones = new List<string> { "Industriales", "Techo" };
+
+                var bloque = CrearBloque("TIPO", opciones, "Tipo", nivel);
+                panel3.Controls.Add(bloque);
+                panel3.ScrollControlIntoView(bloque);
+            }
+
+            if (clave == "Tipo" && valor == "Techo")
+            {
+                var opciones = new List<string> { "Trapezoidal", "Sinusoidal" };
+
+                var bloque = CrearBloque("FORMA", opciones, "Forma", nivel);
+                panel3.Controls.Add(bloque);
+                panel3.ScrollControlIntoView(bloque);
+            }
         }
         void CargarGrid(List<Producto> lista)
         {
@@ -50,8 +125,8 @@ namespace WinFormsApp6
             dataGridView1.Columns.Add("Nombre", "Nombre");
             productos.Add(new Producto
             {
-                Nombre = "Ca�o 30x30 1.6",
-                Categoria = "Ca�os",
+                Nombre = "Caño 30x30 1.6",
+                Categoria = "Caños",
                 Atributos = new Dictionary<string, string>
     {
         { "Tipo", "Estructural" },
@@ -63,8 +138,8 @@ namespace WinFormsApp6
 
             productos.Add(new Producto
             {
-                Nombre = "Ca�o 40x40 2.0",
-                Categoria = "Ca�os",
+                Nombre = "Caño 40x40 2.0",
+                Categoria = "Caños",
                 Atributos = new Dictionary<string, string>
     {
         { "Tipo", "Estructural" },
@@ -87,27 +162,10 @@ namespace WinFormsApp6
             });
             CargarGrid(productos);
 
-            CrearBoton("Ca�os", "Categoria", "Ca�os");
-            CrearBoton("Chapas", "Categoria", "Chapas");
-            CrearBoton("Perfiles", "Categoria", "Perfiles");
-        }
+            var opciones = new List<string> { "Caños", "Chapas", "Perfiles" };
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            filtros.Activos["Categoria"] = "Perfiles";
-            AplicarFiltros();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            filtros.Activos["Categoria"] = "Ca�os";
-            AplicarFiltros();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            filtros.Activos["Categoria"] = "Chapas";
-            AplicarFiltros();
+            var bloque = CrearBloque("PRODUCTO", opciones, "Categoria", 0);
+            panel3.Controls.Add(bloque);
         }
     }
 }
