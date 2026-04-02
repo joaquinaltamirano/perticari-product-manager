@@ -25,7 +25,7 @@ En lugar de hardcodear mil botones, armé un sistema de **Nodos recursivos**:
 *Mapa parcial de como funciona la ramificacion de cada producto.*
 
 ### Árbol de productos (Actual)
-![Data Grid](screenshots/mapa_new.png)
+![Data Grid](screenshots/mapa.png)
 *Mapa mejorado y más visual.*
 
 ## 📌 Pendientes / Roadmap
