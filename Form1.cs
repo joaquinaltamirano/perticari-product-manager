@@ -170,43 +170,7 @@
             // =========================
             // 🌳 ÁRBOL (SOLO CHAPAS POR AHORA)
             // =========================
-            raiz = new Nodo
-            {
-                Titulo = "PRODUCTO",
-                ClaveFiltro = "Categoria",
-                Opciones = new List<Opcion>
-                {
-                    new Opcion
-                    {
-                        Nombre = "Chapas",
-                        Siguiente = new Nodo
-                        {
-                            Titulo = "TIPO",
-                            ClaveFiltro = "Tipo",
-                            Opciones = new List<Opcion>
-                            {
-                                new Opcion
-                                {
-                                    Nombre = "Techo",
-                                    Siguiente = new Nodo
-                                    {
-                                        Titulo = "FORMA",
-                                        ClaveFiltro = "Forma",
-                                        Opciones = new List<Opcion>
-                                        {
-                                            new Opcion { Nombre = "Trapezoidal" },
-                                            new Opcion { Nombre = "Sinusoidal" }
-                                        }
-                                    }
-                                },
-                                new Opcion { Nombre = "Industriales" }
-                            }
-                        }
-                    },
-                    new Opcion { Nombre = "Caños" },
-                    new Opcion { Nombre = "Perfiles" }
-                }
-            };
+            raiz = MapaCategorias.Crear();
 
             // =========================
             // 🟢 ARRANQUE UI
