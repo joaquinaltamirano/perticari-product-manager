@@ -39,7 +39,7 @@ namespace WinFormsApp6
                 // 🟢 ESTRUCTURALES
                 new Opcion
                 {
-                    Nombre = "Estructurales",
+                    Nombre = "Estructural",
                     Siguiente = new Nodo
                     {
                         Titulo = "FORMA",
@@ -187,7 +187,7 @@ namespace WinFormsApp6
                             },
                             new Opcion
                             {
-                                Nombre = "Trapezoidal T-101",
+                                Nombre = "Trapezoidal",
                                 Siguiente = new Nodo
                                 {
                                     Titulo = "MATERIAL",
@@ -239,7 +239,7 @@ namespace WinFormsApp6
                 },
                 new Opcion
                 {
-                    Nombre = "Estructurales",
+                    Nombre = "Estructural",
                     Siguiente = new Nodo
                     {
                         Titulo = "FORMA",

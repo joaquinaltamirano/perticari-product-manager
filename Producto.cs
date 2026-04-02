@@ -12,5 +12,7 @@ namespace WinFormsApp6
         public string Categoria { get; set; }
 
         public Dictionary<string, string> Atributos { get; set; } = new();
+        public decimal Precio { get; set; }
+        public int Stock { get; set; }
     }
 }
