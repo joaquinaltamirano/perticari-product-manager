@@ -125,6 +125,7 @@
             // 
             // flowLayoutPanel1
             // 
+            flowLayoutPanel1.BorderStyle = BorderStyle.FixedSingle;
             flowLayoutPanel1.Location = new Point(19, 44);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Size = new Size(293, 67);

@@ -2,37 +2,58 @@
 {
     public partial class Form1 : Form
     {
+        // =========================
+        // 📦 DATOS PRINCIPALES
+        // =========================
         List<Producto> productos = new List<Producto>();
         Filtros filtros = new Filtros();
+        Nodo raiz;
+
         public Form1()
         {
             InitializeComponent();
         }
 
-        Panel CrearBloque(string titulo, List<string> opciones, string claveFiltro, int nivel)
+        // =========================
+        // 🌳 CREAR BLOQUE DESDE NODO (ENTRY POINT)
+        // =========================
+        void CrearBloqueDesdeNodo(Nodo nodo, int nivel)
+        {
+            var bloque = CrearBloqueUI(nodo, nivel);
+            panel3.Controls.Add(bloque);
+
+            // 👇 opcional: auto scroll al nuevo bloque
+            panel3.ScrollControlIntoView(bloque);
+        }
+
+        // =========================
+        // 🧱 CREACIÓN VISUAL DEL BLOQUE
+        // =========================
+        Panel CrearBloqueUI(Nodo nodo, int nivel)
         {
             Panel bloque = new Panel();
             bloque.Width = 300;
             bloque.Height = 150;
             bloque.Margin = new Padding(10);
-
-            // 👇 ESTÉTICA (lo que pediste)
             bloque.BorderStyle = BorderStyle.FixedSingle;
-            bloque.BackColor = Color.White;
+            bloque.BackColor = Color.LightGray;
 
+            // 🔤 TÍTULO
             Label lbl = new Label();
-            lbl.Text = titulo;
+            lbl.Text = nodo.Titulo;
             lbl.Dock = DockStyle.Top;
             lbl.Height = 30;
             lbl.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
+            // 🔘 CONTENEDOR DE BOTONES
             FlowLayoutPanel flow = new FlowLayoutPanel();
             flow.Dock = DockStyle.Fill;
 
-            foreach (var opcion in opciones)
+            // 🔁 CREAR BOTONES DINÁMICOS
+            foreach (var opcionNodo in nodo.Opciones)
             {
                 Button btn = new Button();
-                btn.Text = opcion;
+                btn.Text = opcionNodo.Nombre;
                 btn.Width = 90;
                 btn.Height = 35;
                 btn.FlatStyle = FlatStyle.Flat;
@@ -40,16 +61,19 @@
 
                 btn.Click += (s, e) =>
                 {
-                    // 1. guardar filtro
-                    filtros.Activos[claveFiltro] = opcion;
+                    // 🧠 1. guardar filtro
+                    filtros.Activos[nodo.ClaveFiltro] = opcionNodo.Nombre;
 
-                    // 2. borrar bloques siguientes
+                    // 🧹 2. borrar lo que está abajo
                     EliminarBloquesDesde(nivel + 1);
 
-                    // 3. crear siguiente bloque (hardcodeado por ahora)
-                    CrearSiguienteBloque(claveFiltro, opcion, nivel + 1);
+                    // 🌱 3. crear siguiente nivel si existe
+                    if (opcionNodo.Siguiente != null)
+                    {
+                        CrearBloqueDesdeNodo(opcionNodo.Siguiente, nivel + 1);
+                    }
 
-                    // 4. actualizar grid
+                    // 🔄 4. actualizar grid
                     AplicarFiltros();
                 };
 
@@ -59,12 +83,15 @@
             bloque.Controls.Add(flow);
             bloque.Controls.Add(lbl);
 
-            // 👇 GUARDAMOS NIVEL EN TAG
+            // 🏷️ guardamos nivel
             bloque.Tag = nivel;
 
             return bloque;
         }
 
+        // =========================
+        // 🧹 BORRAR BLOQUES INFERIORES
+        // =========================
         void EliminarBloquesDesde(int nivel)
         {
             var bloquesAEliminar = panel3.Controls
@@ -78,27 +105,9 @@
             }
         }
 
-        void CrearSiguienteBloque(string clave, string valor, int nivel)
-        {
-            // ejemplo básico
-            if (clave == "Categoria" && valor == "Chapas")
-            {
-                var opciones = new List<string> { "Industriales", "Techo" };
-
-                var bloque = CrearBloque("TIPO", opciones, "Tipo", nivel);
-                panel3.Controls.Add(bloque);
-                panel3.ScrollControlIntoView(bloque);
-            }
-
-            if (clave == "Tipo" && valor == "Techo")
-            {
-                var opciones = new List<string> { "Trapezoidal", "Sinusoidal" };
-
-                var bloque = CrearBloque("FORMA", opciones, "Forma", nivel);
-                panel3.Controls.Add(bloque);
-                panel3.ScrollControlIntoView(bloque);
-            }
-        }
+        // =========================
+        // 📊 GRID
+        // =========================
         void CargarGrid(List<Producto> lista)
         {
             dataGridView1.Rows.Clear();
@@ -109,6 +118,9 @@
             }
         }
 
+        // =========================
+        // 🔍 FILTRADO
+        // =========================
         void AplicarFiltros()
         {
             var filtrados = productos.Where(p =>
@@ -120,52 +132,89 @@
 
             CargarGrid(filtrados);
         }
+
+        // =========================
+        // 🚀 INICIO
+        // =========================
         private void Form1_Load(object sender, EventArgs e)
         {
+            // 🧱 columnas
             dataGridView1.Columns.Add("Nombre", "Nombre");
-            productos.Add(new Producto
-            {
-                Nombre = "Caño 30x30 1.6",
-                Categoria = "Caños",
-                Atributos = new Dictionary<string, string>
-    {
-        { "Tipo", "Estructural" },
-        { "Forma", "Cuadrado" },
-        { "Medida", "30x30" },
-        { "Espesor", "1.6" }
-    }
-            });
 
-            productos.Add(new Producto
-            {
-                Nombre = "Caño 40x40 2.0",
-                Categoria = "Caños",
-                Atributos = new Dictionary<string, string>
-    {
-        { "Tipo", "Estructural" },
-        { "Forma", "Cuadrado" },
-        { "Medida", "40x40" },
-        { "Espesor", "2.0" }
-    }
-            });
-
+            // =========================
+            // 🧪 DATA MOCK
+            // =========================
             productos.Add(new Producto
             {
                 Nombre = "Chapa trapezoidal 0.5",
                 Categoria = "Chapas",
                 Atributos = new Dictionary<string, string>
-    {
-        { "Tipo", "Techo" },
-        { "Forma", "Trapezoidal" },
-        { "Espesor", "0.5" }
-    }
+                {
+                    { "Tipo", "Techo" },
+                    { "Forma", "Trapezoidal" },
+                    { "Espesor", "0.5" }
+                }
             });
+
+            productos.Add(new Producto
+            {
+                Nombre = "Caño 30x30 1.6",
+                Categoria = "Caños",
+                Atributos = new Dictionary<string, string>
+                {
+                    { "Tipo", "Estructural" },
+                    { "Forma", "Cuadrado" }
+                }
+            });
+
+            // =========================
+            // 🌳 ÁRBOL (SOLO CHAPAS POR AHORA)
+            // =========================
+            raiz = new Nodo
+            {
+                Titulo = "PRODUCTO",
+                ClaveFiltro = "Categoria",
+                Opciones = new List<Opcion>
+                {
+                    new Opcion
+                    {
+                        Nombre = "Chapas",
+                        Siguiente = new Nodo
+                        {
+                            Titulo = "TIPO",
+                            ClaveFiltro = "Tipo",
+                            Opciones = new List<Opcion>
+                            {
+                                new Opcion
+                                {
+                                    Nombre = "Techo",
+                                    Siguiente = new Nodo
+                                    {
+                                        Titulo = "FORMA",
+                                        ClaveFiltro = "Forma",
+                                        Opciones = new List<Opcion>
+                                        {
+                                            new Opcion { Nombre = "Trapezoidal" },
+                                            new Opcion { Nombre = "Sinusoidal" }
+                                        }
+                                    }
+                                },
+                                new Opcion { Nombre = "Industriales" }
+                            }
+                        }
+                    },
+                    new Opcion { Nombre = "Caños" },
+                    new Opcion { Nombre = "Perfiles" }
+                }
+            };
+
+            // =========================
+            // 🟢 ARRANQUE UI
+            // =========================
+            CrearBloqueDesdeNodo(raiz, 0);
+
+            // cargar todo al inicio
             CargarGrid(productos);
-
-            var opciones = new List<string> { "Caños", "Chapas", "Perfiles" };
-
-            var bloque = CrearBloque("PRODUCTO", opciones, "Categoria", 0);
-            panel3.Controls.Add(bloque);
         }
     }
 }
