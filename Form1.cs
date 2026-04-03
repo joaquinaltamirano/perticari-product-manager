@@ -1,398 +1,291 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using ReaLTaiizor.Controls;
 
 namespace WinFormsApp6
 {
     public partial class Form1 : Form
     {
-        // === ESTADO ===
+        #region ===== CONFIGURACIÓN Y ESTADO =====
         string textoBusqueda = "";
-        Dictionary<string, int> nivelesFiltro = new Dictionary<string, int>();
-
-        // === DATOS ===
-        List<Producto> productos = new List<Producto>();
-        Filtros filtros = new Filtros();
+        Dictionary<string, int> nivelesFiltro = new();
+        List<Producto> productos = new();
+        Filtros filtros = new();
         Nodo raiz;
+
+        // Paleta de colores consistente
+        Color verdeOsc = Color.FromArgb(15, 30, 19);
+        Color verdeCla = Color.FromArgb(162, 233, 191);
+        Color bordeGris = Color.FromArgb(210, 210, 210);
+        #endregion
 
         public Form1()
         {
             InitializeComponent();
+            DoubleBuffered = true;
+
+            // Configuración del contenedor principal (FlowLayoutPanel)
+            panelContenedor.AutoScroll = true;
+            panelContenedor.FlowDirection = FlowDirection.TopDown;
+            panelContenedor.WrapContents = false;
+            panelContenedor.HorizontalScroll.Enabled = false;
+            panelContenedor.HorizontalScroll.Visible = false;
+            panelContenedor.HorizontalScroll.Maximum = 0;
         }
 
-        // === REFRESH GENERAL ===
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            GenerarMockProductos();
+            raiz = MapaCategorias.Crear();
+            RefrescarTodo();
+        }
+
+        #region ===== MOTOR DE RENDERIZADO (SCROLL ÚNICO) =====
+
         void RefrescarTodo()
         {
-            panel3.Controls.Clear();
+            panelContenedor.SuspendLayout();
+            panelContenedor.Controls.Clear();
+            panelContenedor.AutoScrollPosition = new Point(0, 0);
 
-            ReconstruirCascada(raiz, 0);
+            // Renderizado inicial y cascada recursiva
+            RenderSeccion(raiz, 0);
+            ConstruirCascada(raiz, 0);
 
             AplicarFiltros();
             RenderFiltrosActivos();
             ActualizarBreadcrumb();
+
+            panelContenedor.ResumeLayout();
         }
 
-        // === NAVEGACIÓN DINÁMICA ===
-        void ReconstruirCascada(Nodo nodoActual, int nivel)
+        void ConstruirCascada(Nodo nodoActual, int nivel)
         {
-            if (nodoActual == null) return;
-
-            var bloque = CrearBloqueUI(nodoActual, nivel);
-            panel3.Controls.Add(bloque);
-            panel3.ScrollControlIntoView(bloque);
-
             if (filtros.Activos.ContainsKey(nodoActual.ClaveFiltro))
             {
                 string valorSeleccionado = filtros.Activos[nodoActual.ClaveFiltro];
+                var opcion = nodoActual.Opciones.FirstOrDefault(o => o.Nombre == valorSeleccionado);
 
-                var opcion = nodoActual.Opciones
-                    .FirstOrDefault(o => o.Nombre == valorSeleccionado);
-
-                if (opcion != null && opcion.Siguiente != null)
+                if (opcion?.Siguiente != null)
                 {
-                    ReconstruirCascada(opcion.Siguiente, nivel + 1);
+                    RenderSeccion(opcion.Siguiente, nivel + 1);
+                    ConstruirCascada(opcion.Siguiente, nivel + 1);
                 }
             }
         }
 
-        // === BLOQUES UI ===
-        Panel CrearBloqueUI(Nodo nodo, int nivel)
+        void RenderSeccion(Nodo nodo, int nivel)
         {
-            Panel bloque = new Panel
+            int anchoUtil = panelContenedor.ClientSize.Width - 35;
+            int anchoMinBoton = 110;
+
+            var bloque = new System.Windows.Forms.Panel
             {
-                Width = 300,
-                Height = 150,
-                Margin = new Padding(10),
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.LightGray,
-                Tag = nivel
+                Width = anchoUtil,
+                AutoSize = true,
+                Margin = new Padding(0, (nivel == 0 ? 25 : 10), 0, 15),
+                BackColor = Color.Transparent
             };
 
-            Label lbl = new Label
+            // Gradiente decorativo solo para el primer nivel (PRODUCTO)
+            if (nivel == 0)
             {
-                Text = nodo.Titulo,
-                Dock = DockStyle.Top,
-                Height = 30,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding = new Padding(5, 0, 0, 0)
-            };
-
-            FlowLayoutPanel flow = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(5)
-            };
-
-            foreach (var opcionNodo in nodo.Opciones)
-            {
-                Button btn = new Button
+                bloque.Paint += (s, e) =>
                 {
-                    Text = opcionNodo.Nombre,
-                    Width = 90,
-                    Height = 35,
-                    FlatStyle = FlatStyle.Flat
+                    using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                        bloque.ClientRectangle, verdeCla, Color.FromArgb(245, 245, 245), 90f))
+                    { e.Graphics.FillRectangle(brush, bloque.ClientRectangle); }
                 };
-
-                btn.FlatAppearance.BorderColor = Color.Black;
-
-                bool seleccionado =
-                    filtros.Activos.ContainsKey(nodo.ClaveFiltro) &&
-                    filtros.Activos[nodo.ClaveFiltro] == opcionNodo.Nombre;
-
-                btn.BackColor = seleccionado ? Color.Black : Color.LightGray;
-                btn.ForeColor = seleccionado ? Color.White : Color.Black;
-
-                btn.Click += (s, e) =>
-                {
-                    var clavesAEliminar = nivelesFiltro
-                        .Where(x => x.Value >= nivel)
-                        .Select(x => x.Key)
-                        .ToList();
-
-                    foreach (var c in clavesAEliminar)
-                    {
-                        filtros.Activos.Remove(c);
-                        nivelesFiltro.Remove(c);
-                    }
-
-                    filtros.Activos[nodo.ClaveFiltro] = opcionNodo.Nombre;
-                    nivelesFiltro[nodo.ClaveFiltro] = nivel;
-
-                    RefrescarTodo();
-                };
-
-                flow.Controls.Add(btn);
             }
 
-            bloque.Controls.Add(flow);
-            bloque.Controls.Add(lbl);
+            var lbl = new Label
+            {
+                Text = nodo.Titulo.ToUpper(),
+                Font = new Font("Nexa Heavy", 10, FontStyle.Bold),
+                ForeColor = (nivel == 0) ? Color.White : verdeOsc,
+                BackColor = (nivel == 0) ? verdeOsc : verdeCla,
+                Size = new Size(160, 32),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(15, 10)
+            };
 
-            return bloque;
+            var flow = new FlowLayoutPanel
+            {
+                Location = new Point(10, 50),
+                Width = anchoUtil - 20,
+                AutoSize = true,
+                WrapContents = true, // Evita scroll horizontal, los botones bajan
+                Padding = new Padding(5),
+                BackColor = Color.Transparent
+            };
+
+            foreach (var op in nodo.Opciones)
+                flow.Controls.Add(CrearBotonEstiloFox(op.Nombre, nivel, nodo.ClaveFiltro, flow.Width - 20, anchoMinBoton));
+
+            bloque.Controls.Add(lbl);
+            bloque.Controls.Add(flow);
+            panelContenedor.Controls.Add(bloque);
+
+            // Auto-scroll suave al nuevo bloque
+            this.BeginInvoke(new Action(() => panelContenedor.ScrollControlIntoView(bloque)));
         }
 
-        // === CHIPS ===
+        Control CrearBotonEstiloFox(string texto, int nivel, string clave, int anchoMax, int anchoMin)
+        {
+            bool seleccionado = filtros.Activos.ContainsKey(clave) && filtros.Activos[clave] == texto;
+            Font fuente = new Font("Nexa Heavy", 9);
+
+            // Cálculo de ancho dinámico para no cortar texto
+            int anchoRequerido = TextRenderer.MeasureText(texto.ToUpper(), fuente).Width + 25;
+            int anchoFinal = Math.Min(Math.Max(anchoMin, anchoRequerido), anchoMax);
+
+            var btn = new FoxButton
+            {
+                Text = texto.ToUpper(),
+                Font = fuente,
+                Size = new Size(anchoFinal, 45),
+                BaseColor = seleccionado ? verdeOsc : Color.White,
+                ForeColor = seleccionado ? Color.White : verdeOsc,
+                BorderColor = bordeGris,
+                Cursor = Cursors.Hand,
+                Margin = new Padding(5)
+            };
+
+            btn.MouseEnter += (s, e) => { if (!seleccionado) btn.BaseColor = Color.FromArgb(245, 245, 245); };
+            btn.MouseLeave += (s, e) => { btn.BaseColor = seleccionado ? verdeOsc : Color.White; };
+
+            btn.Click += (s, e) =>
+            {
+                // Limpieza de niveles inferiores al cambiar selección
+                var borrar = nivelesFiltro.Where(x => x.Value >= nivel).Select(x => x.Key).ToList();
+                foreach (var k in borrar) { filtros.Activos.Remove(k); nivelesFiltro.Remove(k); }
+
+                filtros.Activos[clave] = texto;
+                nivelesFiltro[clave] = nivel;
+                RefrescarTodo();
+            };
+
+            return btn;
+        }
+        #endregion
+
+        #region ===== LÓGICA DE FILTROS Y BREADCRUMB =====
+
+        void AplicarFiltros()
+        {
+            var filtrados = productos.Where(p =>
+                filtros.Activos.All(f =>
+                    f.Key == "Categoria" ? p.Categoria.Equals(f.Value, StringComparison.OrdinalIgnoreCase) :
+                    p.Atributos.ContainsKey(f.Key) ? p.Atributos[f.Key].Equals(f.Value, StringComparison.OrdinalIgnoreCase) :
+                    p.Atributos.Values.Any(v => v.Equals(f.Value, StringComparison.OrdinalIgnoreCase))
+                ) && (string.IsNullOrEmpty(textoBusqueda) || p.Nombre.ToLower().Contains(textoBusqueda.ToLower()))
+            ).ToList();
+
+            dataGridView1.DataSource = filtrados.Select(p => new { p.Nombre, p.Categoria, p.Stock, p.Precio }).ToList();
+        }
+
         void RenderFiltrosActivos()
         {
             panelFiltros.Controls.Clear();
-
-            var filtrosOrdenados = nivelesFiltro.OrderBy(x => x.Value);
-
-            foreach (var item in filtrosOrdenados)
+            foreach (var item in nivelesFiltro.OrderBy(x => x.Value))
             {
-                Button chip = new Button
+                bool esRoot = item.Value == 0;
+                var chip = new System.Windows.Forms.Button
                 {
-                    Text = $"{filtros.Activos[item.Key]} ✕",
+                    Text = $"{filtros.Activos[item.Key].ToUpper()}  X",
                     AutoSize = true,
-                    BackColor = Color.Black,
-                    ForeColor = Color.White,
+                    BackColor = esRoot ? verdeOsc : verdeCla,
+                    ForeColor = esRoot ? Color.White : verdeOsc,
                     FlatStyle = FlatStyle.Flat,
-                    Margin = new Padding(2)
+                    Font = new Font("Nexa Heavy", 8),
+                    Margin = new Padding(4)
                 };
-
+                chip.FlatAppearance.BorderSize = 0;
                 chip.Click += (s, e) =>
                 {
-                    var aBorrar = nivelesFiltro
-                        .Where(x => x.Value >= item.Value)
-                        .Select(x => x.Key)
-                        .ToList();
-
-                    foreach (var c in aBorrar)
-                    {
-                        filtros.Activos.Remove(c);
-                        nivelesFiltro.Remove(c);
-                    }
-
+                    var borrar = nivelesFiltro.Where(x => x.Value >= item.Value).Select(x => x.Key).ToList();
+                    foreach (var k in borrar) { filtros.Activos.Remove(k); nivelesFiltro.Remove(k); }
                     RefrescarTodo();
                 };
-
                 panelFiltros.Controls.Add(chip);
             }
         }
 
-        // === BREADCRUMB ===
         void ActualizarBreadcrumb()
         {
-            var ruta = nivelesFiltro
-                .OrderBy(x => x.Value)
-                .Select(x => filtros.Activos[x.Key]);
-
-            labelBreadcrumb.Text =
-                ruta.Any() ? string.Join(" > ", ruta) : "Todos los productos";
+            var ruta = nivelesFiltro.OrderBy(x => x.Value).Select(x => filtros.Activos[x.Key]);
+            labelBreadcrumb.Text = ruta.Any() ? string.Join(" > ", ruta) : "Todos los productos";
         }
+        #endregion
 
-        // === FILTRADO ===
-        // Flexible: matchea por clave o por valor
-        void AplicarFiltros()
-        {
-            var filtrados = productos.Where(p =>
-                // 1. Validar que cumpla con TODOS los filtros activos de la jerarquía
-                filtros.Activos.All(f =>
-                {
-                    // Caso A: Es la categoría principal
-                    if (f.Key == "Categoria")
-                        return p.Categoria.Equals(f.Value, StringComparison.OrdinalIgnoreCase);
-
-                    // Caso B: El producto tiene la clave exacta (ej: "Forma") y el valor coincide
-                    if (p.Atributos.ContainsKey(f.Key))
-                        return p.Atributos[f.Key].Equals(f.Value, StringComparison.OrdinalIgnoreCase);
-
-                    // Caso C (Salvavidas): Si la clave no matchea, buscamos si el VALOR existe en algún atributo
-                    // Esto arregla el problema de si el Nodo se llama "Subtipo" pero el atributo es "Forma"
-                    return p.Atributos.Values.Any(v => v.Equals(f.Value, StringComparison.OrdinalIgnoreCase));
-                })
-                &&
-                // 2. Validar el buscador de texto
-                (
-                    string.IsNullOrEmpty(textoBusqueda) ||
-                    p.Nombre.ToLower().Contains(textoBusqueda) ||
-                    p.Atributos.Values.Any(v => v != null && v.ToLower().Contains(textoBusqueda))
-                )
-            ).ToList();
-
-            CargarGrid(filtrados);
-        }
-
-        // === GRID ===
-        void CargarGrid(List<Producto> lista)
-        {
-            dataGridView1.Columns.Clear();
-            dataGridView1.Rows.Clear();
-
-            // orden de atributos importante
-            List<string> ordenPreferido = new List<string>
-    {
-        "Tipo",
-        "Forma",
-        "Perfil",
-        "Subtipo",
-        "Acabado",
-        "Material",
-        "Variante",
-        "Medida",
-        "Espesor"
-    };
-
-            var atributos = productos
-                .SelectMany(p => p.Atributos.Keys)
-                .Distinct()
-                .ToList();
-
-            atributos = atributos
-                .OrderBy(a =>
-                    ordenPreferido.Contains(a)
-                    ? ordenPreferido.IndexOf(a)
-                    : 999
-                )
-                .ThenBy(a => a)
-                .ToList();
-
-            // columnas base
-            dataGridView1.Columns.Add("Nombre", "Producto");
-            dataGridView1.Columns.Add("Categoria", "Categoría");
-
-            // atributos
-            foreach (var attr in atributos)
-            {
-                dataGridView1.Columns.Add(attr, attr);
-            }
-
-            // 👇 ORDEN FINAL CORRECTO
-            dataGridView1.Columns.Add("Precio", "Precio");
-            dataGridView1.Columns.Add("Stock", "Stock");
-
-            // filas
-            foreach (var p in lista)
-            {
-                var row = new List<object>
-        {
-            p.Nombre,
-            p.Categoria
-        };
-
-                foreach (var attr in atributos)
-                {
-                    row.Add(p.Atributos.ContainsKey(attr) ? p.Atributos[attr] : "");
-                }
-
-                row.Add(p.Precio);
-                row.Add(p.Stock);
-
-                dataGridView1.Rows.Add(row.ToArray());
-            }
-
-            AjustarColumnas();
-        }
-
-        void AjustarColumnas()
-        {
-            foreach (DataGridViewColumn col in dataGridView1.Columns)
-            {
-                if (col.Name == "Nombre") col.Width = 250;
-                else if (col.Name == "Categoria") col.Width = 120;
-                else if (col.Name == "Stock") col.Width = 70;
-                else if (col.Name == "Precio") col.Width = 90;
-                else col.Width = 120;
-            }
-        }
-
-        // === MOCK DATA ===
+        #region ===== MOCK DATA Y EVENTOS =====
         void GenerarMockProductos()
         {
-            productos = new List<Producto>
-            {
-                new Producto {
-                    Nombre = "Chapa trapezoidal T101 0.5",
-                    Categoria = "Chapas",
-                    Precio = 12500,
-                    Stock = 50,
-                    Atributos = new Dictionary<string,string> {
-                        {"Tipo","Techo"},
-                        {"Forma","Trapezoidal"},
-                        {"Espesor","0.5"},
-                        {"Medida","1x3"}
-                    }
-                },
-                new Producto {
-                    Nombre = "Chapa sinusoidal 0.4",
-                    Categoria = "Chapas",
-                    Precio = 9800,
-                    Stock = 80,
-                    Atributos = new Dictionary<string,string> {
-                        {"Tipo","Techo"},
-                        {"Forma","Sinusoidal"},
-                        {"Espesor","0.4"},
-                        {"Medida","1x2.5"}
-                    }
-                },
-                new Producto {
-                    Nombre = "Caño estructural 30x30 1.6",
-                    Categoria = "Caños",
-                    Precio = 7200,
-                    Stock = 120,
-                    Atributos = new Dictionary<string,string> {
-                        {"Tipo","Estructural"},
-                        {"Forma","Cuadrado"},
-                        {"Espesor","1.6"},
-                        {"Medida","30x30"}
-                    }
-                }
+            productos = new List<Producto> {
+                new Producto { Nombre="Chapa T101", Categoria="Chapas", Precio=1200, Stock=20, Atributos=new Dictionary<string,string>{{"Tipo","Techo"},{"Forma","Trapezoidal"}} },
+                new Producto { Nombre="Caño 30x30", Categoria="Caños", Precio=800, Stock=50, Atributos=new Dictionary<string,string>{{"Tipo","Estructural"}} }
             };
-
-            var random = new Random();
-            var baseProductos = productos.ToList();
-
-            for (int i = 0; i < 15; i++)
-            {
-                var baseP = baseProductos[random.Next(baseProductos.Count)];
-
-                productos.Add(new Producto
-                {
-                    Nombre = baseP.Nombre + " v" + (i + 1),
-                    Categoria = baseP.Categoria,
-                    Precio = baseP.Precio + random.Next(-1000, 2000),
-                    Stock = random.Next(10, 150),
-                    Atributos = new Dictionary<string, string>(baseP.Atributos)
-                });
-            }
         }
 
-        // === INIT ===
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            GenerarMockProductos();
-
-            raiz = MapaCategorias.Crear();
-            RefrescarTodo();
-
-            textBox1.TextChanged += (s, ev) =>
-            {
-                textoBusqueda = textBox1.Text.ToLower();
-                AplicarFiltros();
-            };
-
-            dataGridView1.EnableHeadersVisualStyles = false;
-            dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = Color.Black;
-            dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.DefaultCellStyle.SelectionBackColor = Color.DarkGray;
-            dataGridView1.DefaultCellStyle.SelectionForeColor = Color.Black;
-
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-            dataGridView1.RowHeadersVisible = false;
-        }
-
-        // === RESET ===
         private void limpiarFiltros_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             filtros.Activos.Clear();
             nivelesFiltro.Clear();
-            textBox1.Clear();
-            textoBusqueda = "";
-
+            txtBusqueda.ResetText();
             RefrescarTodo();
+        }
+
+        private void btn_Cerrar_Click_1(object sender, EventArgs e) => this.Close();
+        #endregion
+
+        private void txtBusqueda_TextChanged(object sender, EventArgs e)
+        {
+            if (txtBusqueda.Text == "Escribí el nombre de un producto...")
+            {
+                textoBusqueda = "";
+            }
+            else
+            {
+                textoBusqueda = txtBusqueda.Text.ToLower();
+            }
+        }
+
+        private void txtBusqueda_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtBusqueda.Text))
+            {
+                txtBusqueda.Text = "Escribí el nombre de un producto...";
+                txtBusqueda.ForeColor = Color.Gray;
+            }
+        }
+
+        private void limpiarFiltros_LinkClicked_1(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            filtros.Activos.Clear();
+            nivelesFiltro.Clear();
+
+            // 2. Reseteamos el buscador
+            textoBusqueda = "";
+            txtBusqueda.Text = "Escribí el nombre de un producto...";
+            txtBusqueda.ForeColor = Color.Gray;
+
+            // 3. Reconstruimos la interfaz desde cero
+            RefrescarTodo();
+
+            // 4. Opcional: Quitar el foco del link para que se vea limpio
+            this.ActiveControl = null;
+        }
+
+        private void txtBusqueda_Click(object sender, EventArgs e)
+        {
+            if (txtBusqueda.Text == "Escribí el nombre de un producto...")
+            {
+                txtBusqueda.Text = "";
+                txtBusqueda.ForeColor = Color.Black;
+            }
         }
     }
 }
