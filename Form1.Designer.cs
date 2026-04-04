@@ -162,6 +162,7 @@
             btn_Volver.TabIndex = 0;
             btn_Volver.Text = "Volver";
             btn_Volver.UseVisualStyleBackColor = false;
+            btn_Volver.Click += btn_Volver_Click;
             // 
             // verdeOscuro
             // 
