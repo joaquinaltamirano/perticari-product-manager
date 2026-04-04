@@ -95,9 +95,9 @@
             // 
             panelContenedor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             panelContenedor.AutoScroll = true;
-            panelContenedor.Location = new Point(19, 190);
+            panelContenedor.Location = new Point(19, 194);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(382, 274);
+            panelContenedor.Size = new Size(382, 270);
             panelContenedor.TabIndex = 6;
             // 
             // txtBusqueda
@@ -143,7 +143,7 @@
             // pictureBox1
             // 
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(471, 548);
+            pictureBox1.Location = new Point(471, 545);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(52, 31);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;

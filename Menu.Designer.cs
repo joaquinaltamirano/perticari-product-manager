@@ -76,7 +76,7 @@
             foxButton1.OverColor = Color.FromArgb(242, 242, 242);
             foxButton1.Size = new Size(281, 40);
             foxButton1.TabIndex = 1;
-            foxButton1.Text = "???";
+            foxButton1.Text = "COTIZAR";
             // 
             // foxButton2
             // 
@@ -96,7 +96,7 @@
             foxButton2.OverColor = Color.FromArgb(242, 242, 242);
             foxButton2.Size = new Size(281, 40);
             foxButton2.TabIndex = 2;
-            foxButton2.Text = "???";
+            foxButton2.Text = "PEDIDOS";
             // 
             // foxButton3
             // 
@@ -116,7 +116,7 @@
             foxButton3.OverColor = Color.FromArgb(242, 242, 242);
             foxButton3.Size = new Size(281, 40);
             foxButton3.TabIndex = 3;
-            foxButton3.Text = "???";
+            foxButton3.Text = "EXPORTAR";
             // 
             // btn_Cerrar
             // 
@@ -135,7 +135,7 @@
             // pictureBox1
             // 
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(33, 60);
+            pictureBox1.Location = new Point(37, 60);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(431, 183);
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
