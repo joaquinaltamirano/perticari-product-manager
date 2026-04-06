@@ -28,14 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             panel_der = new Panel();
-            pictureBox1 = new PictureBox();
             labelBreadcrumb = new Label();
             dataGridView1 = new DataGridView();
+            pictureBox1 = new PictureBox();
             panel_izq = new Panel();
             panelContenedor = new Panel();
-            pictureBox2 = new PictureBox();
+            iconoBuscar = new PictureBox();
             txtBusqueda = new TextBox();
             panelFiltros = new FlowLayoutPanel();
             border_panelFiltros = new ReaLTaiizor.Controls.AloneTextBox();
@@ -50,11 +51,15 @@
             btn_Cerrar = new Button();
             aloneTextBox1 = new ReaLTaiizor.Controls.AloneTextBox();
             aloneTextBox2 = new ReaLTaiizor.Controls.AloneTextBox();
+            iconoLimpiar = new ReaLTaiizor.Controls.ParrotPictureBox();
+            iconoHora = new ReaLTaiizor.Controls.ParrotPictureBox();
+            hora = new Label();
+            timerHora = new System.Windows.Forms.Timer(components);
             panel_der.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             panel_izq.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)iconoBuscar).BeginInit();
             SuspendLayout();
             // 
             // panel_der
@@ -65,16 +70,6 @@
             panel_der.Name = "panel_der";
             panel_der.Size = new Size(473, 569);
             panel_der.TabIndex = 0;
-            // 
-            // pictureBox1
-            // 
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(948, 606);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(37, 29);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.TabIndex = 6;
-            pictureBox1.TabStop = false;
             // 
             // labelBreadcrumb
             // 
@@ -97,10 +92,23 @@
             dataGridView1.Size = new Size(426, 499);
             dataGridView1.TabIndex = 0;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new Point(948, 606);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(37, 29);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 6;
+            pictureBox1.TabStop = false;
+            // 
             // panel_izq
             // 
+            panel_izq.Controls.Add(hora);
+            panel_izq.Controls.Add(iconoHora);
+            panel_izq.Controls.Add(iconoLimpiar);
             panel_izq.Controls.Add(panelContenedor);
-            panel_izq.Controls.Add(pictureBox2);
+            panel_izq.Controls.Add(iconoBuscar);
             panel_izq.Controls.Add(txtBusqueda);
             panel_izq.Controls.Add(panelFiltros);
             panel_izq.Controls.Add(border_panelFiltros);
@@ -121,15 +129,15 @@
             panelContenedor.Size = new Size(383, 302);
             panelContenedor.TabIndex = 6;
             // 
-            // pictureBox2
+            // iconoBuscar
             // 
-            pictureBox2.Image = (Image)resources.GetObject("pictureBox2.Image");
-            pictureBox2.Location = new Point(360, 155);
-            pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(36, 36);
-            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox2.TabIndex = 8;
-            pictureBox2.TabStop = false;
+            iconoBuscar.Image = (Image)resources.GetObject("iconoBuscar.Image");
+            iconoBuscar.Location = new Point(360, 155);
+            iconoBuscar.Name = "iconoBuscar";
+            iconoBuscar.Size = new Size(36, 36);
+            iconoBuscar.SizeMode = PictureBoxSizeMode.Zoom;
+            iconoBuscar.TabIndex = 8;
+            iconoBuscar.TabStop = false;
             // 
             // txtBusqueda
             // 
@@ -317,6 +325,66 @@
             aloneTextBox2.TextAlign = HorizontalAlignment.Left;
             aloneTextBox2.UseSystemPasswordChar = false;
             // 
+            // iconoLimpiar
+            // 
+            iconoLimpiar.BackgroundImage = (Image)resources.GetObject("iconoLimpiar.BackgroundImage");
+            iconoLimpiar.BackgroundImageLayout = ImageLayout.Zoom;
+            iconoLimpiar.ColorLeft = Color.DodgerBlue;
+            iconoLimpiar.ColorRight = Color.DodgerBlue;
+            iconoLimpiar.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            iconoLimpiar.FilterAlpha = 200;
+            iconoLimpiar.FilterEnabled = true;
+            iconoLimpiar.Image = null;
+            iconoLimpiar.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            iconoLimpiar.IsElipse = false;
+            iconoLimpiar.IsParallax = false;
+            iconoLimpiar.Location = new Point(308, 10);
+            iconoLimpiar.Name = "iconoLimpiar";
+            iconoLimpiar.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            iconoLimpiar.Size = new Size(28, 25);
+            iconoLimpiar.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            iconoLimpiar.TabIndex = 9;
+            iconoLimpiar.Text = "parrotPictureBox1";
+            iconoLimpiar.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            // 
+            // iconoHora
+            // 
+            iconoHora.BackgroundImage = (Image)resources.GetObject("iconoHora.BackgroundImage");
+            iconoHora.BackgroundImageLayout = ImageLayout.Zoom;
+            iconoHora.ColorLeft = Color.DodgerBlue;
+            iconoHora.ColorRight = Color.DodgerBlue;
+            iconoHora.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            iconoHora.FilterAlpha = 200;
+            iconoHora.FilterEnabled = true;
+            iconoHora.Image = null;
+            iconoHora.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            iconoHora.IsElipse = false;
+            iconoHora.IsParallax = false;
+            iconoHora.Location = new Point(19, 13);
+            iconoHora.Name = "iconoHora";
+            iconoHora.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            iconoHora.Size = new Size(28, 25);
+            iconoHora.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            iconoHora.TabIndex = 10;
+            iconoHora.Text = "parrotPictureBox2";
+            iconoHora.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            // 
+            // hora
+            // 
+            hora.AutoSize = true;
+            hora.Font = new Font("Nexa Heavy", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            hora.ForeColor = Color.FromArgb(175, 175, 175);
+            hora.Location = new Point(46, 16);
+            hora.Name = "hora";
+            hora.Size = new Size(57, 19);
+            hora.TabIndex = 6;
+            hora.Text = "00:00";
+            // 
+            // timerHora
+            // 
+            timerHora.Interval = 1000;
+            timerHora.Tick += timerHora_Tick;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -341,11 +409,11 @@
             Load += Form1_Load;
             panel_der.ResumeLayout(false);
             panel_der.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             panel_izq.ResumeLayout(false);
             panel_izq.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)iconoBuscar).EndInit();
             ResumeLayout(false);
         }
 
@@ -368,10 +436,14 @@
         private ReaLTaiizor.Controls.AloneTextBox border_txtBusqueda;
         private Panel panelContenedor;
         private ReaLTaiizor.Controls.AloneTextBox border_panelFiltros;
-        private PictureBox pictureBox2;
+        private PictureBox iconoBuscar;
         private ReaLTaiizor.Controls.HopeRoundButton border_panelContenedor;
         private PictureBox pictureBox1;
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox1;
         private ReaLTaiizor.Controls.AloneTextBox aloneTextBox2;
+        private Label hora;
+        private ReaLTaiizor.Controls.ParrotPictureBox iconoHora;
+        private ReaLTaiizor.Controls.ParrotPictureBox iconoLimpiar;
+        private System.Windows.Forms.Timer timerHora;
     }
 }

@@ -30,6 +30,7 @@ namespace WinFormsApp6
             InitializeComponent();
 
             DoubleBuffered = true;
+            timerHora.Start();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -457,6 +458,11 @@ namespace WinFormsApp6
 
             // 3. Renderizar todo de nuevo
             RefrescarTodo();
+        }
+
+        private void timerHora_Tick(object sender, EventArgs e)
+        {
+            hora.Text = DateTime.Now.ToString("HH:mm");
         }
     }
 }
