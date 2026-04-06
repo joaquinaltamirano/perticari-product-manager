@@ -35,6 +35,9 @@
             dataGridView1 = new DataGridView();
             pictureBox1 = new PictureBox();
             panel_izq = new Panel();
+            hora = new Label();
+            iconoHora = new ReaLTaiizor.Controls.ParrotPictureBox();
+            iconoLimpiar = new ReaLTaiizor.Controls.ParrotPictureBox();
             panelContenedor = new Panel();
             iconoBuscar = new PictureBox();
             txtBusqueda = new TextBox();
@@ -51,9 +54,6 @@
             btn_Cerrar = new Button();
             aloneTextBox1 = new ReaLTaiizor.Controls.AloneTextBox();
             aloneTextBox2 = new ReaLTaiizor.Controls.AloneTextBox();
-            iconoLimpiar = new ReaLTaiizor.Controls.ParrotPictureBox();
-            iconoHora = new ReaLTaiizor.Controls.ParrotPictureBox();
-            hora = new Label();
             timerHora = new System.Windows.Forms.Timer(components);
             panel_der.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -120,6 +120,61 @@
             panel_izq.Size = new Size(428, 571);
             panel_izq.TabIndex = 1;
             // 
+            // hora
+            // 
+            hora.AutoSize = true;
+            hora.Font = new Font("Nexa Heavy", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            hora.ForeColor = Color.FromArgb(175, 175, 175);
+            hora.Location = new Point(46, 16);
+            hora.Name = "hora";
+            hora.Size = new Size(57, 19);
+            hora.TabIndex = 6;
+            hora.Text = "00:00";
+            // 
+            // iconoHora
+            // 
+            iconoHora.BackgroundImage = (Image)resources.GetObject("iconoHora.BackgroundImage");
+            iconoHora.BackgroundImageLayout = ImageLayout.Zoom;
+            iconoHora.ColorLeft = Color.DodgerBlue;
+            iconoHora.ColorRight = Color.DodgerBlue;
+            iconoHora.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            iconoHora.FilterAlpha = 200;
+            iconoHora.FilterEnabled = true;
+            iconoHora.Image = null;
+            iconoHora.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            iconoHora.IsElipse = false;
+            iconoHora.IsParallax = false;
+            iconoHora.Location = new Point(19, 13);
+            iconoHora.Name = "iconoHora";
+            iconoHora.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            iconoHora.Size = new Size(28, 25);
+            iconoHora.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            iconoHora.TabIndex = 10;
+            iconoHora.Text = "parrotPictureBox2";
+            iconoHora.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            // 
+            // iconoLimpiar
+            // 
+            iconoLimpiar.BackgroundImage = (Image)resources.GetObject("iconoLimpiar.BackgroundImage");
+            iconoLimpiar.BackgroundImageLayout = ImageLayout.Zoom;
+            iconoLimpiar.ColorLeft = Color.DodgerBlue;
+            iconoLimpiar.ColorRight = Color.DodgerBlue;
+            iconoLimpiar.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+            iconoLimpiar.FilterAlpha = 200;
+            iconoLimpiar.FilterEnabled = true;
+            iconoLimpiar.Image = null;
+            iconoLimpiar.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            iconoLimpiar.IsElipse = false;
+            iconoLimpiar.IsParallax = false;
+            iconoLimpiar.Location = new Point(308, 10);
+            iconoLimpiar.Name = "iconoLimpiar";
+            iconoLimpiar.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            iconoLimpiar.Size = new Size(28, 25);
+            iconoLimpiar.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            iconoLimpiar.TabIndex = 9;
+            iconoLimpiar.Text = "parrotPictureBox1";
+            iconoLimpiar.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            // 
             // panelContenedor
             // 
             panelContenedor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -144,12 +199,15 @@
             txtBusqueda.BackColor = Color.FromArgb(239, 248, 244);
             txtBusqueda.BorderStyle = BorderStyle.None;
             txtBusqueda.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtBusqueda.ForeColor = SystemColors.ScrollBar;
+            txtBusqueda.ForeColor = Color.DarkGray;
             txtBusqueda.Location = new Point(28, 163);
             txtBusqueda.Name = "txtBusqueda";
             txtBusqueda.Size = new Size(332, 20);
             txtBusqueda.TabIndex = 7;
             txtBusqueda.Text = "Escribí el nombre de un producto...";
+            txtBusqueda.TextChanged += txtBusqueda_TextChanged;
+            txtBusqueda.Enter += txtBusqueda_Enter;
+            txtBusqueda.Leave += txtBusqueda_Leave;
             // 
             // panelFiltros
             // 
@@ -324,61 +382,6 @@
             aloneTextBox2.TabIndex = 8;
             aloneTextBox2.TextAlign = HorizontalAlignment.Left;
             aloneTextBox2.UseSystemPasswordChar = false;
-            // 
-            // iconoLimpiar
-            // 
-            iconoLimpiar.BackgroundImage = (Image)resources.GetObject("iconoLimpiar.BackgroundImage");
-            iconoLimpiar.BackgroundImageLayout = ImageLayout.Zoom;
-            iconoLimpiar.ColorLeft = Color.DodgerBlue;
-            iconoLimpiar.ColorRight = Color.DodgerBlue;
-            iconoLimpiar.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            iconoLimpiar.FilterAlpha = 200;
-            iconoLimpiar.FilterEnabled = true;
-            iconoLimpiar.Image = null;
-            iconoLimpiar.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
-            iconoLimpiar.IsElipse = false;
-            iconoLimpiar.IsParallax = false;
-            iconoLimpiar.Location = new Point(308, 10);
-            iconoLimpiar.Name = "iconoLimpiar";
-            iconoLimpiar.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            iconoLimpiar.Size = new Size(28, 25);
-            iconoLimpiar.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            iconoLimpiar.TabIndex = 9;
-            iconoLimpiar.Text = "parrotPictureBox1";
-            iconoLimpiar.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            // 
-            // iconoHora
-            // 
-            iconoHora.BackgroundImage = (Image)resources.GetObject("iconoHora.BackgroundImage");
-            iconoHora.BackgroundImageLayout = ImageLayout.Zoom;
-            iconoHora.ColorLeft = Color.DodgerBlue;
-            iconoHora.ColorRight = Color.DodgerBlue;
-            iconoHora.CompositingQualityType = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            iconoHora.FilterAlpha = 200;
-            iconoHora.FilterEnabled = true;
-            iconoHora.Image = null;
-            iconoHora.InterpolationType = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
-            iconoHora.IsElipse = false;
-            iconoHora.IsParallax = false;
-            iconoHora.Location = new Point(19, 13);
-            iconoHora.Name = "iconoHora";
-            iconoHora.PixelOffsetType = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            iconoHora.Size = new Size(28, 25);
-            iconoHora.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            iconoHora.TabIndex = 10;
-            iconoHora.Text = "parrotPictureBox2";
-            iconoHora.TextRenderingType = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-            // 
-            // hora
-            // 
-            hora.AutoSize = true;
-            hora.Font = new Font("Nexa Heavy", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            hora.ForeColor = Color.FromArgb(175, 175, 175);
-            hora.Location = new Point(46, 16);
-            hora.Name = "hora";
-            hora.Size = new Size(57, 19);
-            hora.TabIndex = 6;
-            hora.Text = "00:00";
             // 
             // timerHora
             // 

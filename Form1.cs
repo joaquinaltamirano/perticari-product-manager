@@ -16,6 +16,7 @@ namespace WinFormsApp6
         Filtros filtros = new();
         Nodo raiz;
         int yOffset = 0;
+        private const string PlaceholderBusqueda = "Escribí el nombre de un producto...";
         #endregion
 
         #region ===== UI CONFIG =====
@@ -345,6 +346,34 @@ namespace WinFormsApp6
         #endregion
 
         #region ===== BUSCADOR =====
+
+        private void txtBusqueda_Enter(object sender, EventArgs e)
+        {
+            if (txtBusqueda.Text == PlaceholderBusqueda)
+            {
+                txtBusqueda.Text = "";
+                txtBusqueda.ForeColor = verdeOsc;
+            }
+        }
+
+        private void txtBusqueda_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtBusqueda.Text))
+            {
+                txtBusqueda.Text = PlaceholderBusqueda;
+                txtBusqueda.ForeColor = Color.DarkGray;
+                textoBusqueda = "";
+            }
+        }
+
+        private void txtBusqueda_TextChanged(object sender, EventArgs e)
+        {
+            if (txtBusqueda.Text != PlaceholderBusqueda)
+            {
+                textoBusqueda = txtBusqueda.Text.ToLower();
+                AplicarFiltros(); // Tu método que ya hace el Where(...)
+            }
+        }
 
         #endregion
 
