@@ -293,7 +293,7 @@
             btn_Volver.ForeColor = Color.FromArgb(241, 254, 247);
             btn_Volver.Location = new Point(-1, -1);
             btn_Volver.Name = "btn_Volver";
-            btn_Volver.Size = new Size(57, 33);
+            btn_Volver.Size = new Size(66, 33);
             btn_Volver.TabIndex = 0;
             btn_Volver.UseVisualStyleBackColor = false;
             btn_Volver.Click += btn_Volver_Click;
@@ -341,9 +341,9 @@
             btn_Cerrar.FlatStyle = FlatStyle.Flat;
             btn_Cerrar.Font = new Font("Nexa Heavy", 8.249999F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btn_Cerrar.ForeColor = Color.FromArgb(241, 254, 247);
-            btn_Cerrar.Location = new Point(975, -1);
+            btn_Cerrar.Location = new Point(965, -1);
             btn_Cerrar.Name = "btn_Cerrar";
-            btn_Cerrar.Size = new Size(58, 33);
+            btn_Cerrar.Size = new Size(68, 33);
             btn_Cerrar.TabIndex = 5;
             btn_Cerrar.Text = "X";
             btn_Cerrar.UseVisualStyleBackColor = false;

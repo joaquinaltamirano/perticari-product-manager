@@ -16,6 +16,7 @@ namespace WinFormsApp6
         Filtros filtros = new();
         Nodo raiz;
         int yOffset = 0;
+
         private const string PlaceholderBusqueda = "Escribí el nombre de un producto...";
         #endregion
 
@@ -92,7 +93,7 @@ namespace WinFormsApp6
 
         #endregion
 
-        #region ===== UI BLOQUES (FIXED PANEL STACK) =====
+        #region ===== UI BLOQUES =====
 
         void RenderSeccion(Nodo nodo, int nivel)
         {
@@ -189,7 +190,7 @@ namespace WinFormsApp6
 
             foreach (var op in nodo.Opciones)
             {
-                var btn = CrearBoton(op.Nombre, nivel, nodo.ClaveFiltro);
+                var btn = CrearBoton(op.Nombre, nivel, nodo.ClaveFiltro, index+1);
                 btn.Dock = DockStyle.Fill;
 
                 int col = index % columnas;
@@ -216,7 +217,7 @@ namespace WinFormsApp6
             };
         }
 
-        Control CrearBoton(string texto, int nivel, string clave)
+        Control CrearBoton(string texto, int nivel, string clave, int indice)
         {
             bool seleccionado =
                 filtros.Activos.ContainsKey(clave) &&
@@ -234,6 +235,9 @@ namespace WinFormsApp6
                 Margin = new Padding(8),
                 Dock = DockStyle.Fill
             };
+
+            if(seleccionado)
+                btn.OverColor = Color.FromArgb(24, 48, 31);
 
             btn.MouseEnter += (s, e) =>
             {
@@ -256,6 +260,30 @@ namespace WinFormsApp6
                 RefrescarTodo();
             };
 
+            btn.Paint += (s, e) =>
+            {
+                var g = e.Graphics;
+
+                var rectIndicador = new Rectangle(0, 0, 20, 10);
+                Color verdeIndicador = Color.FromArgb(119, 216, 158);
+
+                using (var brushFondo = new SolidBrush(verdeIndicador))
+                {
+                    g.FillRectangle(brushFondo, rectIndicador);
+                }
+
+                using (var fontNumero = new Font("Nexa Heavy", 8, FontStyle.Bold))
+                using (var brushVerde = new SolidBrush(verdeOsc))
+                {
+                    var sf = new StringFormat
+                    {
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
+
+                    g.DrawString(indice.ToString(), fontNumero, brushVerde, rectIndicador, sf);
+                }
+            };
             return btn;
         }
 
