@@ -407,9 +407,11 @@
             Controls.Add(aloneTextBox2);
             ForeColor = SystemColors.ControlText;
             FormBorderStyle = FormBorderStyle.None;
+            KeyPreview = true;
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
+            KeyDown += Form1_KeyDown;
             panel_der.ResumeLayout(false);
             panel_der.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();

@@ -112,6 +112,15 @@ namespace WinFormsApp6
             panelContenedor.BeginInvoke(new Action(() =>
                 panelContenedor.ScrollControlIntoView(bloque)));
         }
+        void EjecutarFiltro(string texto, int nivel, string clave)
+        {
+            LimpiarNivelesDesde(nivel);
+
+            filtros.Activos[clave] = texto;
+            nivelesFiltro[clave] = nivel;
+
+            RefrescarTodo();
+        }
 
         System.Windows.Forms.Panel CrearBloque(Nodo nodo, int nivel)
         {
@@ -190,7 +199,7 @@ namespace WinFormsApp6
 
             foreach (var op in nodo.Opciones)
             {
-                var btn = CrearBoton(op.Nombre, nivel, nodo.ClaveFiltro, index+1);
+                var btn = CrearBoton(op.Nombre, nivel, nodo.ClaveFiltro, index + 1);
                 btn.Dock = DockStyle.Fill;
 
                 int col = index % columnas;
@@ -236,7 +245,7 @@ namespace WinFormsApp6
                 Dock = DockStyle.Fill
             };
 
-            if(seleccionado)
+            if (seleccionado)
                 btn.OverColor = Color.FromArgb(24, 48, 31);
 
             btn.MouseEnter += (s, e) =>
@@ -252,12 +261,7 @@ namespace WinFormsApp6
 
             btn.Click += (s, e) =>
             {
-                LimpiarNivelesDesde(nivel);
-
-                filtros.Activos[clave] = texto;
-                nivelesFiltro[clave] = nivel;
-
-                RefrescarTodo();
+                EjecutarFiltro(texto, nivel, clave);
             };
 
             btn.Paint += (s, e) =>
@@ -284,6 +288,8 @@ namespace WinFormsApp6
                     g.DrawString(indice.ToString(), fontNumero, brushVerde, rectIndicador, sf);
                 }
             };
+
+            btn.Tag = new { texto, nivel, clave, indice };
             return btn;
         }
 
@@ -404,6 +410,63 @@ namespace WinFormsApp6
         }
 
         #endregion
+        #region ===== INTERACCION TECLADO =====
+
+        void SimularClickPorIndice(int nro)
+        {
+            var ultimoBloque = panelContenedor.Controls
+                .OfType<System.Windows.Forms.Panel>()
+                .LastOrDefault();
+
+            if (ultimoBloque != null)
+            {
+                var grid = ultimoBloque.Controls
+                    .OfType<TableLayoutPanel>()
+                    .FirstOrDefault();
+
+                var boton = grid?.Controls
+                    .OfType<FoxButton>()
+                    .FirstOrDefault(b => b.Tag != null && ((dynamic)b.Tag).indice == nro);
+
+                if (boton != null)
+                {
+                    var data = (dynamic)boton.Tag;
+
+                    EjecutarFiltro(data.texto, data.nivel, data.clave);
+                }
+            }
+        }
+        void RetrocederFiltro()
+        {
+            if (!nivelesFiltro.Any()) return;
+
+            int maxNivel = nivelesFiltro.Values.Max();
+
+            // eliminar claves del nivel actual
+            var clavesEnNivel = nivelesFiltro
+                .Where(kv => kv.Value == maxNivel)
+                .Select(kv => kv.Key)
+                .ToList();
+
+            foreach (var clave in clavesEnNivel)
+            {
+                nivelesFiltro.Remove(clave);
+                filtros.Activos.Remove(clave);
+            }
+
+            if (!nivelesFiltro.Any())
+            {
+                RefrescarTodo();
+                return;
+            }
+
+            int nuevoMaxNivel = nivelesFiltro.Values.Max();
+
+            LimpiarNivelesDesde(nuevoMaxNivel + 1); 
+            RefrescarTodo();
+        }
+
+        #endregion
 
         #region ===== MOCK =====
 
@@ -520,6 +583,26 @@ namespace WinFormsApp6
         private void timerHora_Tick(object sender, EventArgs e)
         {
             hora.Text = DateTime.Now.ToString("HH:mm");
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (txtBusqueda.Focused) return;
+
+            // --- LÓGICA DE SELECCIÓN (1-9) ---
+            if (e.KeyCode >= Keys.D1 && e.KeyCode <= Keys.D9 || e.KeyCode >= Keys.NumPad1 && e.KeyCode <= Keys.NumPad9)
+            {
+                // Convierte la tecla a un número (1, 2, 3...)
+                int numeroApretado = (e.KeyCode >= Keys.NumPad1) ? e.KeyCode - Keys.NumPad1 + 1 : e.KeyCode - Keys.D1 + 1;
+
+                SimularClickPorIndice(numeroApretado);
+            }
+
+            // --- LÓGICA DE RETROCESO (Borrar último filtro) ---
+            if (e.KeyCode == Keys.Q || e.KeyCode == Keys.Escape)
+            {
+                RetrocederFiltro();
+            }
         }
     }
 }
