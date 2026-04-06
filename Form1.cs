@@ -22,6 +22,7 @@ namespace WinFormsApp6
         Color verdeOsc = Color.FromArgb(15, 30, 19);
         Color verdeCla = Color.FromArgb(162, 233, 191);
         Color bordeGris = Color.FromArgb(210, 210, 210);
+        Color fondo = Color.FromArgb(239, 248, 244);
         #endregion
 
         public Form1()
@@ -38,7 +39,7 @@ namespace WinFormsApp6
             dataGridView1.ColumnHeadersDefaultCellStyle.BackColor = verdeCla;
             dataGridView1.ColumnHeadersDefaultCellStyle.ForeColor = verdeOsc;
 
-            dataGridView1.BackgroundColor = Color.White;
+            dataGridView1.BackgroundColor = fondo;
             dataGridView1.BorderStyle = BorderStyle.None;
             dataGridView1.RowHeadersVisible = false;
 
@@ -344,16 +345,6 @@ namespace WinFormsApp6
 
         #region ===== BUSCADOR =====
 
-        private void txtBusqueda_TextChanged(object sender, EventArgs e)
-        {
-            if (txtBusqueda.Text == "Escribí el nombre de un producto...")
-                textoBusqueda = "";
-            else
-                textoBusqueda = txtBusqueda.Text.ToLower();
-
-            AplicarFiltros();
-        }
-
         #endregion
 
         #region ===== MOCK =====
@@ -361,31 +352,81 @@ namespace WinFormsApp6
         void GenerarMockProductos()
         {
             productos = new List<Producto>
-            {
-                new Producto
-                {
-                    Nombre="Chapa T101",
-                    Categoria="Chapas",
-                    Precio=1200,
-                    Stock=20,
-                    Atributos=new Dictionary<string,string>
-                    {
-                        {"Tipo","Techo"},
-                        {"Forma","Trapezoidal"}
-                    }
-                },
-                new Producto
-                {
-                    Nombre="Caño 30x30",
-                    Categoria="Caños",
-                    Precio=800,
-                    Stock=50,
-                    Atributos=new Dictionary<string,string>
-                    {
-                        {"Tipo","Estructural"}
-                    }
-                }
-            };
+    {
+        // --- PERFILES ---
+        new Producto {
+            Nombre="PERFIL ANGULO LAMINADO 1 x 1/8", Categoria="Perfiles", Precio=4500, Stock=50,
+            Atributos=new Dictionary<string,string> {{"Tipo","Estructural"}, {"Forma","Angulo"}}
+        },
+        new Producto {
+            Nombre="PERFIL UPN 100 ACINDAR X 12M", Categoria="Perfiles", Precio=85000, Stock=10,
+            Atributos=new Dictionary<string,string> {{"Tipo","Estructural"}, {"Forma","UPN"}}
+        },
+        new Producto {
+            Nombre="PERFIL C 100X50X15 GALVANIZADO", Categoria="Perfiles", Precio=28000, Stock=25,
+            Atributos=new Dictionary<string,string> {{"Tipo","Livianos"}, {"Perfil","CE"}, {"Acabado","Galvanizado"}}
+        },
+        new Producto {
+            Nombre="PLANCHUELA PERF. REDONDA 1 1/4 X 3/16", Categoria="Perfiles", Precio=9200, Stock=15,
+            Atributos=new Dictionary<string,string> {{"Tipo","Macizos"}, {"Forma","Planchuela"}, {"Subtipo","Perforada Redonda"}}
+        },
+
+        // --- CHAPAS ---
+        new Producto {
+            Nombre="CHAPA LISA GALVANIZADA C-25 1x2", Categoria="Chapas", Precio=19500, Stock=40,
+            Atributos=new Dictionary<string,string> {{"Tipo","Industriales"}, {"Subtipo","Lisas"}, {"Acabado","Galvanizada"}}
+        },
+        new Producto {
+            Nombre="CHAPA TRAPEZOIDAL T90 CINCALUM C-25", Categoria="Chapas", Precio=14200, Stock=60,
+            Atributos=new Dictionary<string,string> {{"Tipo","Techo"}, {"Forma","Trapezoidal"}, {"Material","Cincalum"}}
+        },
+        new Producto {
+            Nombre="CHAPA SINUSOIDAL PREPINTADA NEGRA C-25", Categoria="Chapas", Precio=17800, Stock=20,
+            Atributos=new Dictionary<string,string> {{"Tipo","Techo"}, {"Forma","Sinusoidal"}, {"Material","Prepintada"}}
+        },
+
+        // --- CAÑOS ---
+        new Producto {
+            Nombre="CAÑO EPOXI 1/2 SIGAS GAS", Categoria="Caños", Precio=11000, Stock=35,
+            Atributos=new Dictionary<string,string> {{"Tipo","Conduccion"}, {"Variante","Epoxi"}}
+        },
+        new Producto {
+            Nombre="CAÑO ESTRUCTURAL CUADRADO 20X20 1.2MM", Categoria="Caños", Precio=6500, Stock=100,
+            Atributos=new Dictionary<string,string> {{"Tipo","Estructural"}, {"Forma","Cuadrado"}}
+        },
+        new Producto {
+            Nombre="CAÑO RECTANGULAR 60X40 1.6MM", Categoria="Caños", Precio=12400, Stock=45,
+            Atributos=new Dictionary<string,string> {{"Tipo","Estructural"}, {"Forma","Rectangular"}}
+        },
+
+        // --- OBRA ---
+        new Producto {
+            Nombre="HIERRO ALETADO 10MM X 12M", Categoria="Obra", Precio=7800, Stock=150,
+            Atributos=new Dictionary<string,string> {{"Tipo","Aletado"}}
+        },
+        new Producto {
+            Nombre="MALLA SIMA 15X15 5.5MM 2X3M", Categoria="Obra", Precio=22000, Stock=30,
+            Atributos=new Dictionary<string,string> {{"Tipo","Malla Electrosoldada"}, {"Acabado","Negra"}}
+        },
+        new Producto {
+            Nombre="ALAMBRE RECOCIDO N16 (POR KG)", Categoria="Obra", Precio=2500, Stock=200,
+            Atributos=new Dictionary<string,string> {{"Tipo","Alambre"}, {"Subtipo","Recocido"}}
+        },
+
+        // --- HYS (Herrajes y Suministros) ---
+        new Producto {
+            Nombre="ELECTRODOS CONARCO 6013 2.5MM X 1KG", Categoria="HYS", Precio=8900, Stock=80,
+            Atributos=new Dictionary<string,string> {{"Tipo","Electrodos"}, {"Marca","Conarco"}}
+        },
+        new Producto {
+            Nombre="RUEDA PORTON CORREDIZO 60MM V", Categoria="HYS", Precio=5200, Stock=40,
+            Atributos=new Dictionary<string,string> {{"Tipo","Portones"}, {"Subtipo","Ruedas"}}
+        },
+        new Producto {
+            Nombre="CERRADURA KALLAY 4000 REFORZADA", Categoria="HYS", Precio=15600, Stock=12,
+            Atributos=new Dictionary<string,string> {{"Tipo","Herrajes"}, {"Subtipo","Cerraduras"}}
+        }
+    };
         }
 
         #endregion
@@ -401,6 +442,21 @@ namespace WinFormsApp6
             Menu menu = new Menu();
             menu.Show();
             this.Close();
+        }
+
+        private void limpiarFiltros_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // 1. Limpiar diccionarios
+            filtros.Activos.Clear();
+            nivelesFiltro.Clear();
+
+            // 2. Limpiar buscador
+            border_txtBusqueda.Text = "Escribí el nombre de un producto...";
+            border_txtBusqueda.ForeColor = Color.Gray;
+            textoBusqueda = "";
+
+            // 3. Renderizar todo de nuevo
+            RefrescarTodo();
         }
     }
 }

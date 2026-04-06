@@ -18,7 +18,6 @@ namespace WinFormsApp6
             public string Nombre { get; set; }
             public Nodo Siguiente { get; set; }
 
-            // 👇 NUEVO
             public bool EsFinal { get; set; } = false;
         }
 }
